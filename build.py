@@ -27,6 +27,7 @@ class Serial(enum.Enum):
 
 
 def get_mcu(board: str) -> str:
+    """Get the microcontroller unit from boards.txt in the arduino library"""
     with open("/usr/share/arduino/hardware/arduino/boards.txt") as f:
         all_boards = f.read().splitlines()
 
@@ -46,11 +47,14 @@ def get_mcu(board: str) -> str:
 
 
 def run_cmd(cmd: str) -> int:
+    """Echo a command before running it"""
     print(cmd)
     return os.system(cmd)
 
 
 def setenv(function: Callable) -> Callable:
+    """Set the environtment variables for arduino-mk"""
+
     @functools.wraps(function)
     def _run(self, *args, **kwargs):
         os.environ["BOARD_TAG"] = self.board
@@ -64,6 +68,7 @@ def setenv(function: Callable) -> Callable:
 
 class ArduinoBuilder:
     def __init__(self, config: Dict[str, Any], port: Optional[pathlib.Path] = None):
+        """Initialize the builder"""
         self.board = config["arduino"]
         self._mcu = get_mcu(self.board)
         self.port = pathlib.Path(port) if port else None
@@ -78,11 +83,12 @@ class ArduinoBuilder:
         self._power_pins.append(0)
 
     def _generate_ino(self):
+        """Generate the main.ino file"""
         main_ino = """#include "dht_logger.h"
 
 constexpr uint8_t kPowerPins[] = {POWER_PINS};
-constexpr uint8_t kDht22Pins[] = {SENSOR_PINS};
-dht::DhtLogger logger(kDht22Pins, SENSOR_TYPE, &SERIAL, kPowerPins);
+constexpr uint8_t kSensorPins[] = {SENSOR_PINS};
+dht::DhtLogger logger(kSensorPins, SENSOR_TYPE, &SERIAL, kPowerPins);
 
 void setup() {
   Serial.begin(BAUD);
@@ -103,6 +109,7 @@ void loop() {
 
     @setenv
     def make(self, no_build: bool, no_del_src: bool) -> int:
+        """Generate the main.ino and build it using `make`."""
         with open("main.ino", "w") as f:
             f.write(self._generate_ino())
 
@@ -114,6 +121,11 @@ void loop() {
 
     @setenv
     def upload(self, copy_hex_path: Optional[pathlib.Path] = None) -> int:
+        """Flash the Arduino and/or copy the binary hex file.
+
+        Args:
+            copy_hex_path: If specified, copy the hex file here.
+        """
         name = pathlib.Path(__file__).absolute().parent.name
         hex_path = pathlib.Path(f"build-{self.board}/{name}.hex")
         if copy_hex_path:

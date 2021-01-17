@@ -17,14 +17,14 @@ struct ThermalData {
   float heat_index;
 };
 
-// Error codes for read errors.
+// Error codes for read errors. This is used to set the error message in JSON.
 enum Error {
   NO_SENSOR = 1,
   TEMPERATURE,
   HUMIDITY,
 };
 
-// measurement response
+// Measurement response
 struct Measurement {
   bool error;  // if true, union contains errno.
   union {
