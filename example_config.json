@@ -1,0 +1,8 @@
+{
+  "arduino": "nano328",
+  "serial": "Serial",
+  "baud": 115200,
+  "sensor_type": "DHT22",
+  "sensor_pins": [2, 4],
+  "power_pins": [8]
+}

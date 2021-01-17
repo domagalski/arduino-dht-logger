@@ -1,0 +1,9 @@
+[submodule "third_party/DHT-sensor-library"]
+	path = third_party/DHT-sensor-library
+	url = git@github.com:adafruit/DHT-sensor-library.git
+[submodule "third_party/Adafruit_Sensor"]
+	path = third_party/Adafruit_Sensor
+	url = git@github.com:adafruit/Adafruit_Sensor.git
+[submodule "third_party/ArduinoJson"]
+	path = third_party/ArduinoJson
+	url = https://github.com/bblanchon/ArduinoJson
