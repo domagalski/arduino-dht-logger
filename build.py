@@ -82,16 +82,15 @@ class ArduinoBuilder:
 
 constexpr uint8_t kPowerPins[] = {POWER_PINS};
 constexpr uint8_t kDht22Pins[] = {SENSOR_PINS};
-DhtPublisher dht(kDht22Pins, SENSOR_TYPE, &SERIAL, kPowerPins);
+dht::DhtPublisher publisher(kDht22Pins, SENSOR_TYPE, &SERIAL, kPowerPins);
 
 void setup() {
   Serial.begin(BAUD);
-  dht.Setup();
+  publisher.Setup();
 }
 
 void loop() {
-  dht.Publish();
-  delay(2000);
+  delay(publisher.Publish());
 }
 """
 
@@ -179,4 +178,5 @@ if __name__ == "__main__":
     retcode = builder.make(args.no_build, args.no_del_src)
     if retcode:
         sys.exit(retcode)
-    sys.exit(builder.upload(args.copy_hex_path))
+    if not args.no_build:
+        sys.exit(builder.upload(args.copy_hex_path))

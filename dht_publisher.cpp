@@ -2,6 +2,8 @@
 
 #include "dht_publisher.h"
 
+namespace dht {
+
 namespace {
 template <typename T>
 size_t ArraySize(const T *array) {
@@ -41,9 +43,10 @@ void DhtPublisher::Setup() {
   }
 }
 
-void DhtPublisher::Publish() {
+unsigned long DhtPublisher::Publish() {
   DynamicJsonDocument msg(1024);
 
+  const unsigned long start_time = millis();
   for (size_t i = 0; i < n_pins_; i++) {
     // char is u8, largest u8 is 255, three digits + null
     char *pin = new char[4];
@@ -74,8 +77,19 @@ void DhtPublisher::Publish() {
     delete[] pin;
   }
 
+  // publish over serial
   serializeJson(msg, *serial_);
   serial_->println("");
+
+  // calculate the remaining time in the interval
+  const unsigned long end_time = millis();
+  if (end_time <= start_time) {
+    return kPublishIntervalMs;  // clock overflows
+  } else if (end_time - start_time >= kPublishIntervalMs) {
+    return 0;  // too much time elapsed
+  } else {
+    return kPublishIntervalMs - (end_time - start_time);
+  }
 }
 
 Measurement DhtPublisher::ReadSensor(size_t idx) {
@@ -110,3 +124,5 @@ Measurement DhtPublisher::ReadSensor(size_t idx) {
 
   return measurement;
 }
+
+}  // namespace dht

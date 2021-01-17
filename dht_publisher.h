@@ -4,6 +4,12 @@
 
 #include <DHT.h>
 
+namespace dht {
+
+// The DHT sensors can only be queried ever 2 seconds. This uses a 2.5 second
+// interval for publishing to ensure that requirement is enforced.
+static constexpr unsigned long kPublishIntervalMs = 2500;
+
 // Basic thermal data struct
 struct ThermalData {
   float temperature;
@@ -46,7 +52,9 @@ class DhtPublisher {
   void Setup();
 
   // Run one loop iteration and publish over serial
-  void Publish();
+  // Returns:
+  //    The amount time in milliseconds remaining in the publish interval
+  unsigned long Publish();
 
  private:
   Measurement ReadSensor(size_t idx);
@@ -60,3 +68,5 @@ class DhtPublisher {
 
   DHT *dht_;
 };
+
+}  // namespace dht
