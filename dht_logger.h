@@ -7,8 +7,8 @@
 namespace dht {
 
 // The DHT sensors can only be queried ever 2 seconds. This uses a 2.5 second
-// interval for publishing to ensure that requirement is enforced.
-static constexpr unsigned long kPublishIntervalMs = 2500;
+// interval for logging to ensure that requirement is enforced.
+static constexpr unsigned long kLogIntervalMs = 2500;
 
 // Basic thermal data struct
 struct ThermalData {
@@ -33,31 +33,31 @@ struct Measurement {
   };
 };
 
-class DhtPublisher {
+class DhtLogger {
  public:
-  // DHT Publisher
+  // DHT Logger
   //
   // Args:
   //    pins        Array of DHT sensor pins of the same type.
-  //                Array must be null-terminated else runtime error.
+  //                The last element of the array must be zero.
   //    type        The DHT sensor type.
-  //    serial      The Serial interface to write to (assume configured)
+  //    serial      The Serial interface to write to. The serial `begin` method
+  //                must be called outside of DhtLogger.
   //    power_pins  Raise these pins high to use them as 5V power.
-  //                Array must be null-terminated else runtime error.
-  DhtPublisher(const uint8_t *pins, const uint8_t type,
-               HardwareSerial *serial = &Serial,
-               const uint8_t *power_pins = {0});
+  //                The last element of the array must be zero.
+  DhtLogger(const uint8_t pins[], const uint8_t type,
+            HardwareSerial *serial = &Serial, const uint8_t power_pins[] = {0});
 
-  // Raise all pins in the power_pin array
-  void Setup();
+  // Initialize all DHT readers
+  void begin();
 
-  // Run one loop iteration and publish over serial
+  // Read all sensors and write the results over serial
   // Returns:
-  //    The amount time in milliseconds remaining in the publish interval
-  unsigned long Publish();
+  //    The amount time in milliseconds remaining in the logging interval
+  unsigned long writeToSerial();
 
  private:
-  Measurement ReadSensor(size_t idx);
+  Measurement readSensor(size_t idx);
 
   const uint8_t *pins_;
   const size_t n_pins_;

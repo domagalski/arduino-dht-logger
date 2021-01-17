@@ -78,19 +78,19 @@ class ArduinoBuilder:
         self._power_pins.append(0)
 
     def _generate_ino(self):
-        main_ino = """#include "dht_publisher.h"
+        main_ino = """#include "dht_logger.h"
 
 constexpr uint8_t kPowerPins[] = {POWER_PINS};
 constexpr uint8_t kDht22Pins[] = {SENSOR_PINS};
-dht::DhtPublisher publisher(kDht22Pins, SENSOR_TYPE, &SERIAL, kPowerPins);
+dht::DhtLogger logger(kDht22Pins, SENSOR_TYPE, &SERIAL, kPowerPins);
 
 void setup() {
   Serial.begin(BAUD);
-  publisher.Setup();
+  logger.begin();
 }
 
 void loop() {
-  delay(publisher.Publish());
+  delay(logger.writeToSerial());
 }
 """
 
