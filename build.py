@@ -175,17 +175,20 @@ if __name__ == "__main__":
     )
     parser.add_argument("--clean", action="store_true", help="Purge all local builds.")
     args = parser.parse_args()
-    os.chdir(pathlib.Path(__file__).parent)
 
     if args.clean:
+        os.chdir(pathlib.Path(__file__).parent)
         sys.exit(run_cmd("rm -rf build-*"))
 
-    if not args.config_file:
+    if args.config_file:
+        config_file = pathlib.Path(args.config_file).absolute()
+    else:
         raise ValueError("Missing config file.")
 
-    with open(args.config_file) as f:
+    with config_file.open() as f:
         config = json.load(f)
 
+    os.chdir(pathlib.Path(__file__).parent)
     builder = ArduinoBuilder(config, args.port)
     retcode = builder.make(args.no_build, args.no_del_src)
     if retcode:
